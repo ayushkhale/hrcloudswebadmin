@@ -1,10 +1,9 @@
-// const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://dinedash.compunic.co.in';
-const BASE_URL = 'http://192.168.0.102:3005';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
-// ─── In-memory access token (never persisted to localStorage) ────────────────
+// In-memory access token (never persisted to localStorage for security)
 let memoryAccessToken = null;
 
-// ─── Refresh queue to prevent race conditions ────────────────────────────────
+// Refresh queue to prevent race conditions during token expiration
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -19,14 +18,11 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// ─── Core fetch wrapper ──────────────────────────────────────────────────────
+// Core fetch wrapper
 async function customFetch(endpoint, options = {}) {
-  const url = `${BASE_URL}${endpoint}`;
-
-  // Always send cookies for HttpOnly refresh token support
+  const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
   options.credentials = 'include';
 
-  // Setup headers
   if (!(options.body instanceof FormData)) {
     options.headers = {
       'Content-Type': 'application/json',
@@ -36,7 +32,6 @@ async function customFetch(endpoint, options = {}) {
     options.headers = { ...options.headers };
   }
 
-  // Attach in-memory access token if present
   if (memoryAccessToken) {
     options.headers['Authorization'] = `Bearer ${memoryAccessToken}`;
   }
@@ -44,11 +39,9 @@ async function customFetch(endpoint, options = {}) {
   try {
     const response = await fetch(url, options);
 
-    // Intercept 401 (Unauthorized) — access token expired
     const isAuthError = response.status === 401;
-    if (isAuthError && !options._retry && !endpoint.startsWith('/api/public')) {
+    if (isAuthError && !options._retry && !endpoint.startsWith('/api/auth/login')) {
       if (isRefreshing) {
-        // Queue this request while the active refresh is in progress
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -68,7 +61,6 @@ async function customFetch(endpoint, options = {}) {
         processQueue(null, newAccessToken);
         isRefreshing = false;
 
-        // Retry the original failed request with the new token
         options.headers['Authorization'] = `Bearer ${newAccessToken}`;
         return customFetch(endpoint, options);
       } catch (refreshError) {
@@ -79,28 +71,12 @@ async function customFetch(endpoint, options = {}) {
       }
     }
 
-    // Intercept 402 Payment Required — subscription expired
-    if (response.status === 402) {
-      let payload = {};
-      try { payload = await response.json(); } catch (_) { }
-      if (payload.code === 'SUBSCRIPTION_EXPIRED') {
-        window.dispatchEvent(new CustomEvent('subscription-expired'));
-      }
-      const err = new Error(payload.message || 'Subscription expired.');
-      err.status = 402;
-      err.code = payload.code;
-      throw err;
-    }
-
-    // Handle other error responses (status codes >= 400)
     if (!response.ok) {
       let errorMessage = `API error: ${response.statusText}`;
       try {
         const errorData = await response.json();
-        if (errorData && errorData.message) {
-          errorMessage = errorData.message;
-        } else if (errorData && errorData.error) {
-          errorMessage = errorData.error;
+        if (errorData && (errorData.message || errorData.error)) {
+          errorMessage = errorData.message || errorData.error;
         }
       } catch (_) { }
 
@@ -109,7 +85,6 @@ async function customFetch(endpoint, options = {}) {
       throw err;
     }
 
-    // Return parsed JSON if present
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       return await response.json();
@@ -120,11 +95,11 @@ async function customFetch(endpoint, options = {}) {
   }
 }
 
-// ─── Internal refresh logic (shared by interceptor and startup) ──────────────
 async function _doRefresh() {
-  // Try cookie-based refresh first (withCredentials: true via credentials: 'include').
-  // Also send the fallback refresh token in the body for cross-domain / blocked-cookie scenarios.
   const fallbackRefreshToken = localStorage.getItem('fallback_refresh_token');
+  if (!fallbackRefreshToken) {
+    throw new Error('No refresh token available');
+  }
 
   const refreshRes = await fetch(`${BASE_URL}/api/auth/refresh`, {
     method: 'POST',
@@ -141,10 +116,7 @@ async function _doRefresh() {
   const dataObj = refreshData.data || refreshData;
   const { accessToken, refreshToken: newRefreshToken } = dataObj;
 
-  // Store new access token in memory only
   memoryAccessToken = accessToken;
-
-  // Rotate the fallback refresh token in localStorage (token rotation)
   if (newRefreshToken) {
     localStorage.setItem('fallback_refresh_token', newRefreshToken);
   }
@@ -152,7 +124,6 @@ async function _doRefresh() {
   return accessToken;
 }
 
-// ─── Logout helper ───────────────────────────────────────────────────────────
 function handleLogoutRedirect() {
   memoryAccessToken = null;
   localStorage.removeItem('fallback_refresh_token');
@@ -160,7 +131,6 @@ function handleLogoutRedirect() {
   window.dispatchEvent(new Event('auth-logout'));
 }
 
-// ─── Public API surface ──────────────────────────────────────────────────────
 export const api = {
   get: (endpoint, options = {}) =>
     customFetch(endpoint, { ...options, method: 'GET' }),
@@ -185,7 +155,6 @@ export const api = {
   upload: (file, options = {}) => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('image', file);
     return customFetch('/api/upload', {
       ...options,
       method: 'POST',
@@ -193,10 +162,6 @@ export const api = {
     });
   },
 
-  /**
-   * loginUser — stores access token in memory and fallback refresh token in
-   * localStorage. Called from LoginPage after a successful /api/auth/login.
-   */
   loginUser: (accessToken, refreshToken, user) => {
     memoryAccessToken = accessToken;
     if (refreshToken) {
@@ -207,34 +172,25 @@ export const api = {
     }
   },
 
-  /**
-   * logoutUser — invalidates the server-side session, clears all local state
-   * and redirects to /login.
-   */
   logoutUser: async () => {
     try {
-      await customFetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
+      if (BASE_URL) {
+        await customFetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include',
+        });
+      }
+    } catch (_) {
+      // ignore network errors on logout
     } finally {
       handleLogoutRedirect();
       window.location.href = '/login';
     }
   },
 
-  /**
-   * checkSessionPersistence — called on app startup to silently restore a
-   * session if a valid refresh token exists (either via HttpOnly cookie or
-   * localStorage fallback). Returns true if session was restored.
-   */
   checkSessionPersistence: async () => {
     const hasFallbackToken = !!localStorage.getItem('fallback_refresh_token');
-
-    // No local indicator of a prior session — skip the network call
     if (!hasFallbackToken) {
-      // Still attempt if the browser might have an HttpOnly cookie;
-      // but guard with a simple flag to avoid an unnecessary 401 on first load.
       return false;
     }
 
@@ -248,17 +204,10 @@ export const api = {
     }
   },
 
-  /** @deprecated Use checkSessionPersistence instead */
-  refreshSession: async () => {
-    return api.checkSessionPersistence();
-  },
-
-  /** Exposes the current in-memory access token (read-only). */
   get accessToken() {
     return memoryAccessToken;
   },
 
-  /** Exposes the backend base URL. */
   get baseUrl() {
     return BASE_URL;
   },

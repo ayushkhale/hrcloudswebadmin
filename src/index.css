@@ -5,81 +5,95 @@
   --font-outfit: "Bricolage Grotesque", sans-serif;
 
   /* Enforce only the allowed 10 colors in Tailwind classes */
-  --color-onyx: var(--onyx);
-  --color-carbon-black: var(--carbon-black);
-  --color-dark-garnet: var(--dark-garnet);
-  --color-mahogany-red: var(--mahogany-red);
-  --color-mahogany-red-2: var(--mahogany-red-2);
-  --color-strawberry-red: var(--strawberry-red);
+  --color-obsidian: var(--obsidian);
+  --color-ink: var(--ink);
+  --color-deep-violet: var(--deep-violet);
+  --color-royal-purple: var(--royal-purple);
+  --color-brand-purple: var(--brand-purple);
+  --color-light-purple: var(--light-purple);
   --color-silver: var(--silver);
-  --color-dust-grey: var(--dust-grey);
-  --color-white-smoke: var(--white-smoke);
+  --color-lavender-grey: var(--lavender-grey);
+  --color-lavender-smoke: var(--lavender-smoke);
   --color-white: var(--white);
 
-  /* Map standard Tailwind colors to allowed palette to ensure system-wide compliance */
-  --color-red-50: var(--white-smoke);
-  --color-red-100: var(--white-smoke);
-  --color-red-200: var(--dust-grey);
+  /* Map standard Tailwind colors to allowed palette to ensure system-wide compliance.
+     HR Clouds is PURPLE ONLY — the product maps green/emerald, amber/orange and
+     blue/sky away on purpose, so a stray `text-emerald-600` must land on purple
+     rather than break the language. */
+  --color-purple-50: var(--lavender-smoke);
+  --color-purple-100: var(--lavender-smoke);
+  --color-purple-200: var(--lavender-grey);
+  --color-purple-300: var(--silver);
+  --color-purple-400: var(--silver);
+  --color-purple-500: var(--light-purple);
+  --color-purple-600: var(--brand-purple);
+  --color-purple-700: var(--royal-purple);
+  --color-purple-800: var(--deep-violet);
+  --color-purple-900: var(--obsidian);
+
+  --color-red-50: var(--lavender-smoke);
+  --color-red-100: var(--lavender-smoke);
+  --color-red-200: var(--lavender-grey);
   --color-red-300: var(--silver);
   --color-red-400: var(--silver);
-  --color-red-500: var(--strawberry-red);
-  --color-red-600: var(--mahogany-red-2);
-  --color-red-700: var(--mahogany-red);
-  --color-red-800: var(--dark-garnet);
-  --color-red-900: var(--onyx);
+  --color-red-500: var(--light-purple);
+  --color-red-600: var(--brand-purple);
+  --color-red-700: var(--royal-purple);
+  --color-red-800: var(--deep-violet);
+  --color-red-900: var(--obsidian);
 
-  --color-emerald-50: var(--white-smoke);
-  --color-emerald-100: var(--white-smoke);
-  --color-emerald-200: var(--dust-grey);
+  --color-emerald-50: var(--lavender-smoke);
+  --color-emerald-100: var(--lavender-smoke);
+  --color-emerald-200: var(--lavender-grey);
   --color-emerald-300: var(--silver);
   --color-emerald-400: var(--silver);
-  --color-emerald-500: var(--strawberry-red);
-  --color-emerald-600: var(--mahogany-red-2);
-  --color-emerald-700: var(--mahogany-red);
-  --color-emerald-800: var(--dark-garnet);
-  --color-emerald-900: var(--onyx);
+  --color-emerald-500: var(--light-purple);
+  --color-emerald-600: var(--brand-purple);
+  --color-emerald-700: var(--royal-purple);
+  --color-emerald-800: var(--deep-violet);
+  --color-emerald-900: var(--obsidian);
 
-  --color-blue-50: var(--white-smoke);
-  --color-blue-100: var(--white-smoke);
-  --color-blue-200: var(--dust-grey);
+  --color-blue-50: var(--lavender-smoke);
+  --color-blue-100: var(--lavender-smoke);
+  --color-blue-200: var(--lavender-grey);
   --color-blue-300: var(--silver);
   --color-blue-400: var(--silver);
-  --color-blue-500: var(--mahogany-red-2);
-  --color-blue-600: var(--mahogany-red);
-  --color-blue-700: var(--carbon-black);
-  --color-blue-800: var(--onyx);
-  --color-blue-900: var(--onyx);
+  --color-blue-500: var(--brand-purple);
+  --color-blue-600: var(--royal-purple);
+  --color-blue-700: var(--ink);
+  --color-blue-800: var(--obsidian);
+  --color-blue-900: var(--obsidian);
 
-  --color-amber-50: var(--white-smoke);
-  --color-amber-100: var(--white-smoke);
-  --color-amber-200: var(--dust-grey);
+  --color-amber-50: var(--lavender-smoke);
+  --color-amber-100: var(--lavender-smoke);
+  --color-amber-200: var(--lavender-grey);
   --color-amber-300: var(--silver);
   --color-amber-400: var(--silver);
-  --color-amber-500: var(--mahogany-red-2);
-  --color-amber-600: var(--carbon-black);
-  --color-amber-700: var(--onyx);
+  --color-amber-500: var(--brand-purple);
+  --color-amber-600: var(--ink);
+  --color-amber-700: var(--obsidian);
 
-  --color-gray-50: var(--white-smoke);
-  --color-gray-100: var(--white-smoke);
-  --color-gray-200: var(--dust-grey);
+  --color-gray-50: var(--lavender-smoke);
+  --color-gray-100: var(--lavender-smoke);
+  --color-gray-200: var(--lavender-grey);
   --color-gray-300: var(--silver);
   --color-gray-400: var(--silver);
   --color-gray-500: var(--silver);
-  --color-gray-600: var(--carbon-black);
-  --color-gray-700: var(--carbon-black);
-  --color-gray-800: var(--onyx);
-  --color-gray-900: var(--onyx);
+  --color-gray-600: var(--ink);
+  --color-gray-700: var(--ink);
+  --color-gray-800: var(--obsidian);
+  --color-gray-900: var(--obsidian);
 
-  --color-neutral-50: var(--white-smoke);
-  --color-neutral-100: var(--white-smoke);
-  --color-neutral-200: var(--dust-grey);
+  --color-neutral-50: var(--lavender-smoke);
+  --color-neutral-100: var(--lavender-smoke);
+  --color-neutral-200: var(--lavender-grey);
   --color-neutral-300: var(--silver);
   --color-neutral-400: var(--silver);
   --color-neutral-500: var(--silver);
-  --color-neutral-600: var(--carbon-black);
-  --color-neutral-700: var(--carbon-black);
-  --color-neutral-800: var(--onyx);
-  --color-neutral-900: var(--onyx);
+  --color-neutral-600: var(--ink);
+  --color-neutral-700: var(--ink);
+  --color-neutral-800: var(--obsidian);
+  --color-neutral-900: var(--obsidian);
 
   /* Sharper borders system-wide to remove "AI roundness" */
   --radius-xs: 2px;
@@ -91,55 +105,64 @@
   --radius-3xl: 6px;
 }
 
-/* ── Design Tokens ─────────────────────────────────────────────────── */
+/* ── Design Tokens ─────────────────────────────────────────────────────
+   The HR Clouds palette, ported from the product's own design tokens
+   (`HR Clouds App/src/theme/tokens.js`) so the console and the product read
+   as one company. Ten slots, exactly as before — only the values moved from
+   red to purple.
+
+   PURPLE ONLY. The product maps green/emerald → violet, amber/orange →
+   fuchsia and blue/sky → indigo on purpose; never introduce one here. */
 :root {
-  --onyx: #0b090aff;
-  --carbon-black: #161a1dff;
-  --dark-garnet: #660708ff;
-  --mahogany-red: #a4161aff;
-  --mahogany-red-2: #ba181bff;
-  --strawberry-red: #e5383bff;
-  --silver: #b1a7a6ff;
-  --dust-grey: #d3d3d3ff;
-  --white-smoke: #f5f3f4ff;
+  --obsidian: #150c24ff;
+  --ink: #22143aff;
+  --deep-violet: #3b0764ff;
+  --royal-purple: #7e22ceff;
+  --brand-purple: #9333eaff;
+  --light-purple: #a855f7ff;
+  --silver: #a79db4ff;
+  --lavender-grey: #e6e1f0ff;
+  --lavender-smoke: #f7f5fcff;
   --white: #ffffffff;
 
-  --primary: var(--mahogany-red-2);
-  --primary-hover: var(--mahogany-red);
-  --primary-dark: var(--dark-garnet);
-  --primary-light: var(--white-smoke);
-  --primary-border: var(--dust-grey);
+  --primary: var(--brand-purple);
+  --primary-hover: var(--royal-purple);
+  --primary-dark: var(--deep-violet);
+  --primary-light: var(--lavender-smoke);
+  --primary-border: var(--lavender-grey);
 
-  --text-primary: var(--onyx);
-  --text-secondary: var(--carbon-black);
+  --text-primary: var(--obsidian);
+  --text-secondary: var(--ink);
   --text-muted: var(--silver);
 
-  --bg-page: var(--white-smoke);
+  --bg-page: var(--lavender-smoke);
   --bg-surface: var(--white);
-  --bg-subtle: var(--white-smoke);
+  --bg-subtle: var(--lavender-smoke);
 
-  --border: var(--dust-grey);
-  --border-subtle: var(--white-smoke);
+  --border: var(--lavender-grey);
+  --border-subtle: var(--lavender-smoke);
 
-  /* Status design tokens aligned to allowed palette */
-  --status-pending-bg: var(--white-smoke);
-  --status-pending-text: var(--carbon-black);
-  --status-pending-border: var(--dust-grey);
+  /* Status design tokens aligned to allowed palette.
+     The five tones keep their original slot order; what they MEAN here is an
+     organisation's standing on the platform, not an order's progress. */
+  --status-pending-bg: var(--lavender-smoke);
+  --status-pending-text: var(--ink);
+  --status-pending-border: var(--lavender-grey);
 
-  --status-preparing-bg: var(--white-smoke);
-  --status-preparing-text: var(--mahogany-red);
+  --status-preparing-bg: var(--lavender-smoke);
+  --status-preparing-text: var(--royal-purple);
   --status-preparing-border: var(--silver);
 
-  --status-ready-bg: var(--white-smoke);
-  --status-ready-text: var(--mahogany-red-2);
+  --status-ready-bg: var(--lavender-smoke);
+  --status-ready-text: var(--brand-purple);
   --status-ready-border: var(--silver);
 
-  --status-served-bg: var(--white-smoke);
-  --status-served-text: var(--onyx);
-  --status-served-border: var(--dust-grey);
+  --status-served-bg: var(--lavender-smoke);
+  --status-served-text: var(--obsidian);
+  --status-served-border: var(--lavender-grey);
 
-  --status-cancelled-bg: var(--white-smoke);
-  --status-cancelled-text: var(--strawberry-red);
+  --status-cancelled-bg: var(--lavender-smoke);
+  --status-cancelled-text: var(--light-purple);
   --status-cancelled-border: var(--silver);
 
   --radius-xs: 2px;
@@ -194,13 +217,21 @@
 
 .dd-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(186, 24, 27, 0.08);
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
 }
 
 .dd-input:disabled {
   background: var(--bg-subtle);
   color: var(--text-muted);
   cursor: not-allowed;
+}
+
+/* A search box with an icon sitting in its left gutter. `.dd-input` sets
+   padding with a shorthand and is unlayered, so a Tailwind `pl-9` utility
+   loses to it and the placeholder runs under the icon. Declared after it so
+   the longhand wins at equal specificity. */
+.dd-input-search {
+  padding-left: 34px;
 }
 
 /* ── Shared Button Styles ──────────────────────────────────────────── */
@@ -315,6 +346,41 @@
   border-color: var(--status-cancelled-border);
 }
 
+/* Platform-meaning badges, so a screen can say what it means (an organisation
+   is active / needs attention) instead of borrowing a status name from another
+   product. No new colours — these are the same ten slots.
+
+   SEVERITY RUNS WITH WEIGHT. With one hue to work in, the only thing that can
+   carry severity is how heavy the chip reads, so it goes light to dark:
+   neutral (grey-lavender) → active (brand purple on a wash) → attention (royal
+   purple, solid border) → suspended (obsidian on lavender-grey, the heaviest
+   thing on the screen). Tying severity to lightness the other way round — the
+   mistake worth naming, because it is easy to make — leaves a suspended
+   organisation looking calmer than a healthy one. */
+.dd-badge-active {
+  background: var(--lavender-smoke);
+  color: var(--brand-purple);
+  border-color: var(--lavender-grey);
+}
+
+.dd-badge-attention {
+  background: var(--lavender-smoke);
+  color: var(--royal-purple);
+  border-color: var(--silver);
+}
+
+.dd-badge-suspended {
+  background: var(--lavender-grey);
+  color: var(--obsidian);
+  border-color: var(--silver);
+}
+
+.dd-badge-neutral {
+  background: var(--lavender-smoke);
+  color: var(--silver);
+  border-color: var(--lavender-grey);
+}
+
 /* ── Card ──────────────────────────────────────────────────────────── */
 .dd-card {
   background: var(--bg-surface);
@@ -336,7 +402,7 @@
 .dd-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(24, 14, 44, 0.45);
   backdrop-filter: blur(3px);
   z-index: 50;
   display: flex;
@@ -349,7 +415,7 @@
   background: #fff;
   border-radius: var(--radius-xl);
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 60px rgba(21, 12, 36, 0.15);
   overflow: hidden;
 }
 
@@ -405,7 +471,7 @@
 }
 
 .dd-table tbody tr:hover td {
-  background: #fafafa;
+  background: #fbfaff;
 }
 
 .dd-table tbody tr:last-child td {
@@ -416,7 +482,7 @@
 .dd-spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid rgba(186, 24, 27, 0.15);
+  border: 3px solid rgba(147, 51, 234, 0.15);
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: dd-spin 0.7s linear infinite;
@@ -428,44 +494,23 @@
   }
 }
 
-/* ── Printer & Ticket Scroll Animations ────────────────────────────── */
-.receipts-animate {
-  transform: translateY(-560px);
-  animation: print-ticket 2.6s cubic-bezier(0.19, 1, 0.22, 1) 0.3s forwards;
+/* ── Skeleton ──────────────────────────────────────────────────────────
+   Never show a blank page while data loads — the product's rule, and the one
+   thing a console that fetches across every organisation needs most. */
+.dd-skeleton {
+  background: linear-gradient(90deg,
+      var(--lavender-grey) 25%,
+      var(--lavender-smoke) 50%,
+      var(--lavender-grey) 75%);
+  background-size: 200% 100%;
+  animation: dd-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
 }
 
-@keyframes print-ticket {
-  0% {
-    transform: translateY(-560px);
+@keyframes dd-shimmer {
+  to {
+    background-position: -200% 0;
   }
-
-  35% {
-    transform: translateY(-360px);
-  }
-
-  70% {
-    transform: translateY(-150px);
-  }
-
-  100% {
-    transform: translateY(0);
-  }
-}
-
-/* ── QR perforation line ───────────────────────────────────────────── */
-.receipt-qr-split::before {
-  content: '';
-  background: linear-gradient(to right, #ffffff 50%, #f5f4f2 50%);
-  background-size: 16px 4px;
-  height: 4px;
-  width: 90%;
-  display: block;
-  left: 0;
-  right: 0;
-  top: -2px;
-  position: absolute;
-  margin: auto;
-  z-index: 10;
 }
 
 /* ── Fade-in animation ─────────────────────────────────────────────── */
@@ -483,6 +528,15 @@
 
 .dd-fade-in {
   animation: fadeInUp 0.2s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .dd-fade-in,
+  .dd-skeleton,
+  .dd-spinner {
+    animation: none;
+  }
 }
 
 @media print {
