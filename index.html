@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicons.png" />
+    <meta name="description" content="HR Clouds Platform Console — the control plane for every organisation on HR Clouds." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>HR Clouds — Platform Console</title>
+    <!--
+      Sets the theme BEFORE the first paint. React mounts too late: without
+      this, someone in the dark theme gets a white flash on every load, and
+      a crash screen shown before the provider mounts would be light-themed
+      inside a dark console. Deliberately inline and dependency-free — a
+      separate file is another request this has to win a race against.
+      The key and the values are ThemeContext's; keep the two in step.
+    -->
+    <script>
+      (function () {
+        try {
+          var choice = localStorage.getItem("hrclouds_console_theme") || "system";
+          var dark =
+            choice === "dark" ||
+            (choice !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {
+          /* Storage blocked. Light theme, and the console still loads. */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

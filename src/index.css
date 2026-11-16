@@ -1,0 +1,77 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: "Manrope", sans-serif;
+  }
+
+  /* The page behind React, so an overscroll bounce, the gap above a short
+     screen and the flash during a reload are the theme's colour and not
+     white. `html` carries it too: on iOS the overscroll area takes its
+     colour from the root element, not from body. */
+  html,
+  body {
+    background-color: #f8f7fb;
+  }
+  html.dark,
+  html.dark body {
+    background-color: #0b0910;
+  }
+
+  /* Anyone who asks the OS for less motion gets none of ours. Near-zero
+     rather than `none`, so transitionend / animationend listeners still fire. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Every dropdown draws the same way in every browser — a native <select>
+     otherwise keeps the OS control's own corners and arrow placement. */
+  select:not([multiple]):not([size]) {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2364748b'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1rem 1rem;
+    padding-right: 2.25rem;
+    cursor: pointer;
+  }
+
+  /* The arrow is baked into that data URI, so its colour can't be a class —
+     the dark theme needs its own copy or the chevron disappears into the
+     control. Same path, lighter fill. */
+  html.dark select:not([multiple]):not([size]) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2394a3b8'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  /* A full-screen overlay is positioned against the VIEWPORT, so no parent may
+     give it a margin. Drop a dialog into a `space-y-*` column and Tailwind
+     lands a margin-top on `fixed inset-0`, which slides the dim layer down the
+     screen and leaves a bright strip across the top. */
+  .fixed.inset-0 {
+    margin: 0 !important;
+  }
+
+  /* Hides the bar on a strip that carries its own affordances. Never removes
+     `overflow` — the strip stays scrollable by wheel, trackpad and keyboard. */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
