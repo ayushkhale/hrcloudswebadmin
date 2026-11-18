@@ -16,11 +16,13 @@
 // customer, is kept.
 // ─────────────────────────────────────────────────────────────────────────────
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { HiChevronDown, HiLogout, HiMenuAlt2, HiSearch } from "react-icons/hi";
+import { Link, useNavigate } from "react-router-dom";
+import { HiChevronDown, HiIdentification, HiLogout, HiMenuAlt2, HiSearch } from "react-icons/hi";
 
-import { NAV_ITEMS } from "../../config/navigation";
-import { roleTitle } from "../../config/dictionary";
+import { DICTIONARY } from "../../config/dictionary";
+
+import { navItemsFor } from "../../config/navigation";
+import { TIER_META } from "../../config/platformAccess";
 import { useAuth } from "../contexts/AuthContext";
 import { useSidebar } from "../contexts/SidebarContext";
 import ThemeToggle from "./ThemeToggle";
@@ -37,7 +39,7 @@ const SEARCH_SHORTCUT = (() => {
 
 export default function ConsoleTopBar({ title }) {
   const navigate = useNavigate();
-  const { user, role, logout } = useAuth();
+  const { actor, tier, logout } = useAuth();
   const { toggleSidebar } = useSidebar();
 
   const searchRef = useRef(null);
@@ -46,8 +48,13 @@ export default function ConsoleTopBar({ title }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const needle = query.trim().toLowerCase();
+  // Search sees the same menu the sidebar does. A page you may not open must
+  // not surface in a search box either — finding it there and being refused
+  // on arrival is worse than never seeing it.
   const matches = needle
-    ? NAV_ITEMS.filter((item) => !item.soon && `${item.label} ${item.section}`.toLowerCase().includes(needle)).slice(0, 8)
+    ? navItemsFor(tier)
+        .filter((item) => `${item.label} ${item.section}`.toLowerCase().includes(needle))
+        .slice(0, 8)
     : [];
 
   useEffect(() => {
@@ -69,12 +76,21 @@ export default function ConsoleTopBar({ title }) {
     navigate(item.path);
   };
 
-  const initials = (user?.name || user?.email || "?")
+  const initials = (actor?.name || actor?.identifier || "?")
     .split(/[\s@._]+/)
     .filter(Boolean)
     .slice(0, 2)
     .map((w) => w[0].toUpperCase())
     .join("");
+
+  // The name above, the role below — and they must never be the same word.
+  // `role.name` is the server's label for the row ("Super Admin"), shown as
+  // given; the tier's own plain-words label stands in only when the server
+  // sent no role name at all.
+  const roleLabel = actor?.role?.name || TIER_META[tier]?.label || "";
+  // When there is no profile name, the top line is already the identifier, so
+  // the menu below must not print it a second time.
+  const hasDistinctName = Boolean(actor?.name) && actor.name !== actor.identifier;
 
   return (
     <header className="bg-white dark:bg-night-900 px-3 sm:px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-20 font-sans gap-2 sm:gap-4 border-b lg:border-none border-slate-100 dark:border-night-700 shadow-sm lg:shadow-none dark:shadow-none">
@@ -86,11 +102,13 @@ export default function ConsoleTopBar({ title }) {
         >
           <HiMenuAlt2 className="w-5 h-5" />
         </button>
+        {/* The title only. There used to be a fixed line under it reading
+            "Every organisation on HR Clouds" — written when the Overview was
+            the only screen, and simply untrue on the staff and roles pages.
+            It also repeated the PageHeader's own subtitle two centimetres
+            below it, which is the thing §5 exists to prevent. */}
         <div className="min-w-0">
           <p className="text-sm font-bold text-slate-800 truncate dark:text-slate-100">{title}</p>
-          <p className="hidden sm:block text-[11px] font-medium text-slate-500 dark:text-slate-400">
-            Every organisation on HR Clouds
-          </p>
         </div>
       </div>
 
@@ -163,9 +181,9 @@ export default function ConsoleTopBar({ title }) {
             </span>
             <span className="hidden sm:flex flex-col text-left leading-tight min-w-0">
               <span className="text-xs font-bold text-slate-800 truncate max-w-[9rem] dark:text-slate-100">
-                {user?.name || user?.email}
+                {actor?.name || actor?.identifier}
               </span>
-              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">{roleTitle(role)}</span>
+              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">{roleLabel}</span>
             </span>
             <HiChevronDown
               className={`w-4 h-4 text-slate-400 transition-transform dark:text-slate-500 ${menuOpen ? "rotate-180" : ""}`}
@@ -183,17 +201,28 @@ export default function ConsoleTopBar({ title }) {
                   it stands, and claims nothing it does not do. */}
               <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-100 rounded-xl shadow-lg py-2 z-50 dark:bg-night-850 dark:border-night-600">
                 <div className="px-4 pb-2 mb-1 border-b border-slate-50 dark:border-night-700">
-                  <p className="text-xs font-bold text-slate-800 truncate dark:text-slate-100">{user?.name}</p>
-                  <p className="text-[11px] text-slate-500 truncate dark:text-slate-400">{user?.email}</p>
+                  {hasDistinctName && (
+                    <p className="text-xs font-bold text-slate-800 truncate dark:text-slate-100">{actor.name}</p>
+                  )}
+                  <p className="text-[11px] text-slate-500 truncate dark:text-slate-400">{actor?.identifier}</p>
                 </div>
 
-                <ThemeToggle className="pb-2 mb-1 border-b border-slate-50 dark:border-night-700" />
+                <Link
+                  to="/console/account"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors dark:text-slate-300 dark:hover:bg-night-800 dark:hover:text-slate-100"
+                >
+                  <HiIdentification className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                  {DICTIONARY.HEADERS.ACCOUNT}
+                </Link>
+
+                <ThemeToggle className="pt-1 pb-2 mb-1 border-t border-b border-slate-50 dark:border-night-700" />
 
                 <button
                   type="button"
                   onClick={async () => {
                     setMenuOpen(false);
-                    if (!(await window.confirm("Sign out of the Platform Console?"))) return;
+                    if (!(await window.confirm("Sign out?"))) return;
                     await logout();
                     navigate("/login", { replace: true });
                   }}

@@ -14,11 +14,76 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { request, qs } from "./client";
 import { ENV } from "../../config/env";
-import { SAMPLE_ORGANISATIONS, SAMPLE_SIGNUPS } from "../../data/sample";
+import { SAMPLE_ACTOR, SAMPLE_ORGANISATIONS, SAMPLE_SIGNUPS } from "../../data/sample";
 import { daysUntil } from "../utils/format";
 
 /** A trial this close to its end is worth a human looking at it. */
 const TRIAL_WARNING_DAYS = 7;
+
+// ─── Identity ────────────────────────────────────────────────────────────────
+
+/**
+ * `GET /platform/me` (#281) — who is signed in, and what they may see.
+ *
+ * This is the console's bootstrap AND its access check in one call, and it is
+ * the only thing that may decide either. The token's `role` claim is not an
+ * answer: the server re-reads the actual grant from the database on every
+ * platform request, so a staff member who was demoted ninety seconds ago is
+ * refused on their next call rather than when their token expires in three
+ * days. That is the whole point of calling this on every app start.
+ *
+ * A failure here is not one case but four, and they are handled by the
+ * caller, not swallowed here — see `AuthContext`:
+ *   403 PLATFORM_ACCESS_REQUIRED → not staff; this console is not for them
+ *   403 PLATFORM_ACCESS_REVOKED  → was staff; sign out
+ *   500 / 503                    → the guard failed closed; retry, don't sign out
+ *   401                          → ordinary expiry, handled in the client
+ */
+export async function getMe({ signal } = {}) {
+  if (!ENV.USE_SAMPLE_DATA) {
+    const res = await request("/platform/me", { signal });
+    return normaliseActor(res?.data ?? res);
+  }
+  return settle(normaliseActor(SAMPLE_ACTOR), 350);
+}
+
+/**
+ * One actor shape, whichever of the two documented ones arrives.
+ *
+ * The dated change record and the Phase 1 analysis both specify the name
+ * fields FLAT on `data` (`first_name`, `display_name`, `avatar_url`). The
+ * integration guide's §6.1 example nests the same fields under `profile` and
+ * adds a `status`. Both are written as authoritative and they contradict each
+ * other, so this reads either and hands the rest of the console one shape.
+ *
+ * Every name field is nullable by contract — a staff member created by the
+ * bootstrap CLI has no profile row at all — so `name` falls back to the
+ * identifier they signed in with rather than rendering an empty header.
+ */
+function normaliseActor(data) {
+  if (!data) return null;
+  const profile = data.profile || data;
+  const displayName = profile.display_name || [profile.first_name, profile.last_name].filter(Boolean).join(" ");
+
+  return {
+    id: data.id,
+    identifier: data.identifier,
+    identifierType: data.identifier_type || null,
+    // Never an empty string: the top bar prints this, and a blank name there
+    // reads as a broken page rather than as a missing profile row.
+    name: displayName || data.identifier || null,
+    firstName: profile.first_name ?? null,
+    lastName: profile.last_name ?? null,
+    avatarUrl: profile.avatar_url ?? null,
+    // The gate. Everything the console shows or hides hangs off this one word.
+    tier: data.tier,
+    // Display only — never branch on `role.key`, which from Phase 2 can be a
+    // custom key this build has never seen.
+    role: data.role ? { key: data.role.key, name: data.role.name, priority: data.role.priority } : null,
+    status: data.status ?? null,
+    lastLoginAt: data.last_login_at ?? null,
+  };
+}
 
 /** Sample reads resolve on a short delay, so loading states are real in dev. */
 const settle = (value, ms = 450) => new Promise((resolve) => setTimeout(() => resolve(value), ms));
@@ -104,4 +169,4 @@ function buildOverview(orgs, signups) {
 
 const tierOf = (code) => (code === "free" ? "Free" : code.startsWith("starter") ? "Starter" : "Growth");
 
-export const platformAPI = { getOverview, listOrganisations };
+export const platformAPI = { getMe, getOverview, listOrganisations };

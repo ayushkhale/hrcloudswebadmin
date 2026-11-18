@@ -2,41 +2,33 @@
 // ConsoleSidebar.jsx — the menu. Same chrome as HR Clouds Web's sidebar: 16rem
 // wide, white, one hairline border, the active row in the brand's pale purple.
 //
-// It renders `NAV_SECTIONS` and holds no knowledge of its own. A screen that
-// is designed but not built renders as a greyed row with a "Soon" tag — see
-// the note in navigation.js for why that beats a link that goes nowhere.
+// It renders `NAV_SECTIONS` and holds no knowledge of its own. Every row in
+// it is a link to a screen that exists; nothing is drawn as a preview of work
+// that hasn't shipped.
 // ─────────────────────────────────────────────────────────────────────────────
 import { Link, useLocation } from "react-router-dom";
 import { HiX } from "react-icons/hi";
 
-import { NAV_SECTIONS } from "../../config/navigation";
+import { navSectionsFor } from "../../config/navigation";
 import { useSidebar } from "../contexts/SidebarContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const FOCUS = "outline-none focus-visible:ring-2 focus-visible:ring-purple-200 dark:focus-visible:ring-purple-500/40";
 
 export default function ConsoleSidebar() {
   const location = useLocation();
   const { isMobileSidebarOpen, closeSidebar } = useSidebar();
+  // The menu is the viewer's menu. A row above their tier is absent, not
+  // greyed — see the note in navigation.js.
+  const { tier } = useAuth();
+  const sections = navSectionsFor(tier);
 
   const closeOnMobile = () => closeSidebar();
 
   const renderItem = (item) => {
-    if (item.soon) {
-      return (
-        <div
-          key={item.path}
-          title="Designed, not built yet"
-          className="flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-300 cursor-default select-none dark:text-slate-600"
-        >
-          <item.icon className="w-4 h-4 text-slate-200 dark:text-slate-700" />
-          <span className="truncate">{item.label}</span>
-          <span className="ml-auto text-[9px] font-bold uppercase tracking-wider text-slate-300 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-full dark:text-slate-500 dark:bg-night-800 dark:border-night-700">
-            Soon
-          </span>
-        </div>
-      );
-    }
-
+    // Every row is a link. There is no greyed "Soon" variant any more — see
+    // the note in navigation.js for why those rows were removed outright
+    // rather than left in as a preview of the roadmap.
     const active = location.pathname === item.path;
     return (
       <Link
@@ -89,16 +81,8 @@ export default function ConsoleSidebar() {
           </button>
         </div>
 
-        {/* Which plane this is. Without it, two HR Clouds tabs side by side are
-            indistinguishable — and one of them can change every customer. */}
-        <div className="px-6 pb-5">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-100 text-[10px] font-bold uppercase tracking-wider dark:bg-purple-500/15 dark:text-purple-200 dark:border-purple-500/25">
-            Platform Console
-          </span>
-        </div>
-
-        <nav aria-label="Main" className="px-4 pb-6 space-y-5">
-          {NAV_SECTIONS.map((section) => (
+        <nav aria-label="Main" className="px-4 pt-1 pb-6 space-y-5">
+          {sections.map((section) => (
             <div key={section.title} className="space-y-1">
               {!section.flat && (
                 <p className="px-4 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider dark:text-slate-500">

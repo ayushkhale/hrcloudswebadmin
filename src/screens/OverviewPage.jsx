@@ -29,7 +29,6 @@ import {
   HiCash,
   HiExclamationCircle,
   HiOfficeBuilding,
-  HiSparkles,
   HiUserGroup,
 } from "react-icons/hi";
 
@@ -138,11 +137,11 @@ export default function OverviewPage() {
       <ConsoleTopBar title={DICTIONARY.HEADERS.OVERVIEW} />
 
       <main className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-7xl w-full mx-auto">
+        {/* No `art` prop: the banner carries it by default, so no screen can
+            end up being the one without it. */}
         <PageHeader
-          badgeText="PLATFORM CONSOLE"
-          badgeIcon={HiSparkles}
-          title="How HR Clouds is doing"
-          subtitle="Every organisation, their people, and what they pay."
+          title="Platform overview"
+          subtitle="Every organisation on HR Clouds, the people in them, and what they pay."
         />
 
         {error ? (

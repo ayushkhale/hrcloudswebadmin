@@ -21,6 +21,16 @@ const REFRESH_TOKEN_KEY = "hrclouds_console_refresh_token";
 export const SESSION_EXPIRED_EVENT = "hrclouds-console:session-expired";
 
 /**
+ * Fired when the server says this account is no longer platform staff.
+ *
+ * Separate from SESSION_EXPIRED because it is a different fact and needs a
+ * different sentence: the token is perfectly valid, the access behind it was
+ * taken away. The guard re-reads the database on EVERY platform request, so
+ * this can arrive mid-session on any call — not at the 72-hour token expiry.
+ */
+export const ACCESS_REVOKED_EVENT = "hrclouds-console:access-revoked";
+
+/**
  * Read a JWT's claims without verifying it. JWTs are base64url — plain atob()
  * rejects "-" and "_" — and hold UTF-8 JSON, so a name with an accent in it
  * needs a real UTF-8 decode rather than a charCode loop.
@@ -72,6 +82,11 @@ export function notifySessionExpired() {
   window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
 }
 
+export function notifyAccessRevoked() {
+  tokenHelper.clear();
+  window.dispatchEvent(new CustomEvent(ACCESS_REVOKED_EVENT));
+}
+
 /** `{ a: 1, b: undefined }` → `?a=1`. Empty values are dropped, not sent. */
 export function qs(params = {}) {
   const search = new URLSearchParams();
@@ -85,16 +100,43 @@ export function qs(params = {}) {
 }
 
 /**
- * An error the UI can read: `.message` is already the sentence to show, and
- * `.status` lets a caller tell "you may not" from "it broke".
+ * An error the UI can read: `.message` is already the sentence to show,
+ * `.status` lets a caller tell "you may not" from "it broke", and `.code` is
+ * the server's machine-readable reason.
+ *
+ * `.code` matters more than it looks: the platform plane answers with THREE
+ * different 403s that are indistinguishable by status alone and need opposite
+ * responses — PLATFORM_ACCESS_REQUIRED (never show the console),
+ * PLATFORM_ACCESS_REVOKED (sign out now) and FORBIDDEN (keep the session, hide
+ * one action). Branching on `status === 403` alone would sign out an operator
+ * who merely opened a page above their tier.
  */
 export class ApiError extends Error {
-  constructor(message, status, body) {
+  constructor(message, status, body, code = null) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.body = body;
+    this.code = code;
   }
+}
+
+/**
+ * The two error envelopes in circulation, read as one.
+ *
+ * The dated API change records specify `{ success, message, errorCode }`, and
+ * say the envelope is unchanged throughout. The integration guide's overview
+ * section writes `{ success, error: { code, message } }` instead. They
+ * disagree, so the console reads both rather than betting on either — and if
+ * a response carries neither, `.code` is null and callers fall back to the
+ * status, which is what they would have had anyway.
+ */
+function readErrorEnvelope(payload) {
+  if (!payload || typeof payload !== "object") return { code: null, message: null };
+  return {
+    code: payload.errorCode || payload.error?.code || payload.code || null,
+    message: payload.message || payload.error?.message || null,
+  };
 }
 
 export async function request(path, { method = "GET", body, headers = {}, signal } = {}) {
@@ -132,13 +174,26 @@ export async function request(path, { method = "GET", body, headers = {}, signal
   clearTimeout(timer);
 
   const payload = await response.json().catch(() => null);
+  const { code, message } = readErrorEnvelope(payload);
 
   if (response.status === 401) {
     notifySessionExpired();
-    throw new ApiError(payload?.message || "Your session has expired. Please sign in again.", 401, payload);
+    throw new ApiError(message || "Your session has expired. Please sign in again.", 401, payload, code);
   }
+
+  // Access taken away while signed in. The token is still valid — the grant
+  // behind it is gone — so this ends the session on its own terms rather than
+  // waiting for a 401 that will never come.
+  if (response.status === 403 && code === "PLATFORM_ACCESS_REVOKED") {
+    notifyAccessRevoked();
+    throw new ApiError(message || "Your access has been removed.", 403, payload, code);
+  }
+
+  // Everything else — including PLATFORM_ACCESS_REQUIRED and FORBIDDEN —
+  // comes back to the caller with its session intact. A page above your tier
+  // is not a reason to throw you out of the building.
   if (!response.ok) {
-    throw new ApiError(payload?.message || "Something went wrong. Try again.", response.status, payload);
+    throw new ApiError(message || "Something went wrong. Try again.", response.status, payload, code);
   }
   return payload;
 }

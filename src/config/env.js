@@ -1,7 +1,13 @@
 // One read of import.meta.env for the whole app, so a screen never reaches
 // into Vite's globals and no two files disagree about a default.
 export const ENV = {
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
+  /**
+   * Includes the version segment, exactly as HR Clouds Web's does
+   * (`https://api.hrclouds.in/api/v1`), so a path in an api module reads
+   * `/platform/me` and matches the `/api/v1/platform/me` in the API docs
+   * without a `/v1` glued onto every call site.
+   */
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1",
 
   /**
    * The platform plane does not exist on the backend yet — the endpoints in

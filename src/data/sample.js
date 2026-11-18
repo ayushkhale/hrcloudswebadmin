@@ -5,7 +5,7 @@
 // of the answer `platform.api.js` will one day get from the server, written
 // out so the console can be built, reviewed and demoed before the backend
 // plane exists. Every field here corresponds to something HR Clouds already
-// stores about an organisation (see docs/PLATFORM_CONSOLE_VISION.md).
+// stores about an organisation (see docs/product/platform-console-vision.md).
 //
 // When the real endpoint ships, delete the matching branch in platform.api.js
 // — not this file's consumers. Nothing above the api layer knows this exists.
@@ -72,14 +72,31 @@ export const SAMPLE_SIGNUPS = [
 ];
 
 /**
- * The person signed in, as `/platform/auth/me` will one day return them.
+ * The person signed in, in the exact shape `GET /platform/me` (#281) returns
+ * — snake_case, nested `role`, nullable name fields. It is written the
+ * server's way rather than the console's so that `normaliseActor` is
+ * exercised in sample mode too; a sample object in the convenient shape would
+ * mean the one function standing between two disputed response formats never
+ * ran until the day it met a real server.
+ *
  * A real NAME, not "Platform Admin" — the top bar prints the name above the
  * role, and a person called after their own job title made that read as the
  * same word twice.
+ *
+ * Change `tier` to "ADMIN" or "WORKER" to see the console as that person: the
+ * menu, the routes and the account screen all narrow. That is the quickest
+ * way to check a tier gate without a backend.
  */
-export const SAMPLE_VIEWER = {
-  id: "pa_0001",
-  name: "Aarav Mehta",
-  email: "admin@hrclouds.in",
-  role: "platform_admin",
+export const SAMPLE_ACTOR = {
+  id: "8f2c1d4a-57c6-4a1b-9f3e-6c2b8d4a1e55",
+  identifier: "admin@hrclouds.in",
+  identifier_type: "email",
+  status: "active",
+  first_name: "Aarav",
+  last_name: "Mehta",
+  display_name: "Aarav Mehta",
+  avatar_url: null,
+  role: { key: "super-admin", name: "Super Admin", priority: 100 },
+  tier: "SUPER_ADMIN",
+  last_login_at: new Date(Date.now() - 19 * 3600_000).toISOString(),
 };

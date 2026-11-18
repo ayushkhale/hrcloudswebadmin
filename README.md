@@ -66,7 +66,7 @@ src/
 - **[`CLAUDE.md`](CLAUDE.md)** — the house rules. Naming, the four screen
   states, one-read-per-screen, the purple-only palette, how dialogs work.
   Read it before writing a screen.
-- **[`docs/PLATFORM_CONSOLE_VISION.md`](docs/PLATFORM_CONSOLE_VISION.md)** —
+- **[`docs/product/platform-console-vision.md`](docs/product/platform-console-vision.md)** —
   what this should become: twelve capability areas, a four-phase roadmap, and
   what the backend has to build for any of it to be real.
 
